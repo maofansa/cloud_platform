@@ -1,0 +1,12 @@
+<pool type="rbd">
+  <name>libvirt-pool</name>
+  <source>
+    <name>libvirt-pool</name>
+    <host name='ceph1' port='6789'/>
+    <host name='ceph2' port='6789'/>
+    <host name='ceph3' port='6789'/>
+    <auth username='libvirt' type='ceph'>
+      <secret uuid='6a57032e-81d8-4f4b-aa14-ac763aa14a51'/>
+    </auth>
+  </source>
+</pool>

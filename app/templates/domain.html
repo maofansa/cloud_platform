@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <div id="root" class="app-amis"></div>
+    <link rel="stylesheet" href="{{ url_for('static',filename='amis/sdk.css') }}" />
+    <script src="{{ url_for('static',filename='amis/sdk.js' )}}"></script>
+    <script type="text/javascript">
+    (function () {
+        let amis = amisRequire('amis/embed')
+        let amisJSON = {
+            "type": "page",
+            "title": "虚拟机管理",
+            "body": [
+                {
+                    "type": "crud",
+                    "api": "/domainlist",
+                    "name": "domainlist",
+                    "syncLocation": false,
+                    "loadDataOnce": true,
+                    "bulkActions": [
+                        {
+                            "label": "批量启动",
+                            "type": "button",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domains/start"},
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "reload": "domainlist"
+                        },
+                        {
+                            "label": "批量暂停",
+                            "type": "button",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domains/pause"},
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "reload": "domainlist"
+                        },
+                        {
+                            "label": "批量关机",
+                            "type": "button",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domains/shutdown"},
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "confirmText": "确认要批量关闭虚拟机？",
+                            "reload": "domainlist"
+                        },
+                        {
+                            "label": "批量强制关机",
+                            "type": "button",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domains/destroy"},
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "confirmText": "确认要批量强制关闭虚拟机？",
+                            "reload": "domainlist"
+                        },
+                        {
+                            "label": "批量删除",
+                            "type": "button",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domains/undefine"},
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "confirmText": "确认要批量删除虚拟机？",
+                            "reload": "domainlist"
+                        }
+                    ],
+                    "itemActions": [
+                        {
+                            "label": "启动",
+                            "type": "button",
+                            "disabledOn": "${state == 'RUNNING'}",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domain/start/{$uuid}"
+                            },
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "reload": "domainlist"
+                        },
+                        {
+                            "type": "button",
+                            "label": "暂停",
+                            "disabledOn": "${state != 'RUNNING'}",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domain/pause/{$uuid}"
+                            },
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "reload": "domainlist"
+                        },
+                        {
+                            "type": "button",
+                            "label": "关机",
+                            "disabledOn": "${state != 'RUNNING'}",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domain/shutdown/{$uuid}"
+                            },
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "confirmText": "确认要关闭虚拟机 $name ？",
+                            "reload": "domainlist"
+                        },
+                        {
+                            "type": "button",
+                            "label": "强制关机",
+                            "disabledOn": "${state == 'SHUTOFF'}",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domain/destroy/{$uuid}"
+                            },
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "confirmText": "确认要强制关闭虚拟机 $name ？",
+                            "reload": "domainlist"
+                        },
+                        {
+                            "type": "button",
+                            "label": "删除",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/domain/undefine/{$uuid}"
+                            },
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "confirmText": "确认要删除虚拟机 $name ？",
+                            "reload": "domainlist"
+                        },
+                        {
+                            "type": "button",
+                            "label": "修改配置",
+                            "actionType": "dialog",
+                            "dialog": {
+                                "type": "dialog",
+                                "title": "修改配置",
+                                "body": [
+                                    {
+                                        "type": "form",
+                                        "title": "",
+                                        "api": {
+                                            "method": "post",
+                                            "url": "/domain/config"
+                                        },
+                                        "data": {
+                                            "dom_uuid": "$uuid",
+                                            "name": "$name"
+                                        },
+                                        "body": [
+                                            {
+                                                "type": "static",
+                                                "label": "虚拟机",
+                                                "tpl": "${name}"
+                                            },
+                                            {
+                                                "type": "input-number",
+                                                "label": "CPU数量",
+                                                "name": "vcpu",
+                                                "step": 1,
+                                                "validateOnChange": true,
+                                                "validations": {
+                                                    "isInt": true,
+                                                    "minimum": 1,
+                                                    "maximum": 10
+                                                },
+                                            },
+                                            {
+                                                "type": "input-number",
+                                                "label": "内存大小",
+                                                "name": "memory",
+                                                "step": 128,
+                                                "validations": {
+                                                    "minimum": 512,
+                                                    "maximum": 8192
+                                                },
+                                                "validateOnChange": true,
+                                                "unitOptions": [
+                                                    "MB"
+                                                ]
+                                            }
+                                        ],
+                                        "submitText": "修改",
+                                        "mode": "horizontal",
+                                        "redirect": "/domain"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "button",
+                            "label": "生成模板",
+                            "actionType": "dialog",
+                            "dialog": {
+                                "type": "dialog",
+                                "title": "生成模板",
+                                "body": [
+                                    {
+                                        "type": "form",
+                                        "title": "生成模板",
+                                        "api": {
+                                            "method": "post",
+                                            "url": "/domain/save"
+                                        },
+                                        "data": {
+                                            "dom_uuid": "$uuid",
+                                            "name": "$name"
+                                        },
+                                        "body": [
+                                            {
+                                                "type": "static",
+                                                "label": "虚拟机",
+                                                "tpl": "${name}"
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "label": "模板名称",
+                                                "name": "img-name",
+                                                "required": true
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "label": "描述",
+                                                "name": "img-title",
+                                                "value": ""
+                                            }
+                                        ],
+                                        "submitText": "生成",
+                                        "mode": "horizontal",
+                                        "redirect": "/domain"
+                                    }
+                                ]
+                            }
+                        },
+                    ],
+                    "primaryField": "uuid",
+                    "source": "${items | filter:uuid,name,state,title,host:match:keywords}",
+                    "filter": {
+                        "title": "查询条件",
+                        "body": [
+                            {
+                                "type": "input-text",
+                                "name": "keywords",
+                                "label": "关键字"
+                            }
+                        ]
+                    },
+                    "columns": [
+                        {
+                            "name": "uuid",
+                            "label": "UUID",
+                            "sortable": true
+                        },
+                        {
+                            "name": "id",
+                            "label": "ID",
+                            "sortable": true
+                        },
+                        {
+                            "name": "name",
+                            "label": "名称",
+                            "sortable": true
+                        },
+                        {
+                            "label": "状态",
+                            "name": "state",
+                            "sortable": true
+                        },
+                        {
+                            "label": "内存使用数据",
+                            "name": "memory_usage",
+                            "visible": false,
+                            "sortable": true
+                        },
+                        {
+                            "type": "mapping",
+                            "label": "内存使用",
+                            "name": "memory_usage_mapping",
+                            "map": {
+                                "1": "<span class='label label-success'>健康</span>",
+                                "2": "<span class='label label-warning'>紧张</span>",
+                                "3": "<span class='label label-danger'>高负载</span>",
+                                "0": "<span class='label label-default'>未运行</span>"
+                            },
+                            "sortable": true
+                        },
+                        {
+                            "label": "内存",
+                            "name": "max_memory",
+                            "sortable": true
+                        },
+                        {
+                            "label": "CPU",
+                            "name": "vcpu",
+                            "sortable": true
+                        },
+                        {
+                            "label": "描述",
+                            "name": "title"
+                        },
+                        {
+                            "label": "详细描述",
+                            "name": "description"
+                        },
+                        {
+                            "name": "host",
+                            "label": "主机",
+                            "sortable": true
+                        }
+                    ],
+                    "headerToolbar": [
+                        {
+                            "type": "bulk-actions"
+                        },
+                        {
+                            "type": "pagination"
+                        },
+                        {
+                            "type": "button",
+                            "tpl": "内容",
+                            "label": "新建",
+                            "actionType": "drawer",
+                            "drawer": {
+                                "type": "drawer",
+                                "title": "新建虚拟机",
+                                "body": [
+                                    {
+                                        "type": "form",
+                                        "title": "新建虚拟机",
+                                        "name": "createForm",
+                                        "api": {
+                                            "method": "post",
+                                            "url": "/domain/create"
+                                        },
+                                        "initApi": "/initUUID",
+                                        "body": [
+                                            {
+                                                "type": "button-group-select",
+                                                "name": "modeSelect",
+                                                "options": [
+                                                    {
+                                                        "label": "单个创建",
+                                                        "value": 1
+                                                    },
+                                                    {
+                                                        "label": "批量创建",
+                                                        "value": 2
+                                                    }
+                                                ],
+                                                "joinValues": true,
+                                                "value": "1",
+                                            },
+                                            {
+                                                "type": "static",
+                                                "label": "mode",
+                                                "inline": true,
+                                                "tpl": "${modeSelect}",
+                                                "clearValueOnHidden": false,
+                                                "visible": false
+                                            },
+                                            {
+                                                "label": "UUID",
+                                                "type": "input-text",
+                                                "name": "uuid",
+                                                "readOnly": true,
+                                                "visibleOn": "${modeSelect == 1}"
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "label": "名称",
+                                                "name": "name",
+                                                "required": true
+                                            },
+                                            {
+                                                "type": "input-number",
+                                                "label": "VCPU",
+                                                "name": "vcpu",
+                                                "min": "1",
+                                                "step": 1,
+                                                "max": "10",
+                                                "validations": {
+                                                    "isInt": true,
+                                                    "minimum": 1,
+                                                    "maximum": 10
+                                                },
+                                                "description": "CPU数量：1-10",
+                                                "validateOnChange": true,
+                                                "required": true
+                                            },
+                                            {
+                                                "type": "input-number",
+                                                "label": "内存",
+                                                "name": "memory",
+                                                "step": 128,
+                                                "validations": {
+                                                    "minimum": 512,
+                                                    "maximum": 8192
+                                                },
+                                                "validateOnChange": true,
+                                                "unitOptions": [
+                                                    "MB"
+                                                ],
+                                                "required": true
+                                            },
+                                            {
+                                                "type": "switch",
+                                                "option": "",
+                                                "name": "imageSwitch",
+                                                "optionAtLeft": false,
+                                                "trueValue": true,
+                                                "falseValue": false,
+                                                "offText": "从镜像创建",
+                                                "onText": "从模板创建",
+                                                "value": false
+                                            },
+                                            {
+                                                "type": "input-number",
+                                                "label": "硬盘",
+                                                "name": "storage",
+                                                "step": 1,
+                                                "validations": {
+                                                    "minimum": 5,
+                                                    "maximum": 200
+                                                },
+                                                "validateOnChange": true,
+                                                "unitOptions": [
+                                                    "GB"
+                                                ],
+                                                "required": true,
+                                                "visibleOn": "${imageSwitch == false}"
+                                            },
+                                            {
+                                                "type": "select",
+                                                "label": "操作系统",
+                                                "name": "cdrom",
+                                                "source": "/cdromlist",
+                                                "required": true,
+                                                "visibleOn": "${imageSwitch == false}"
+                                            },
+                                            {
+                                                "type": "select",
+                                                "label": "模板",
+                                                "name": "image",
+                                                "source": "/imagelistname",
+                                                "required": true,
+                                                "visibleOn": "${imageSwitch}"
+                                            },
+                                            {
+                                                "label": "简单描述",
+                                                "name": "title",
+                                                "type": "input-text",
+                                                "value": ""
+                                            },
+                                            {
+                                                "type": "textarea",
+                                                "label": "描述",
+                                                "name": "description",
+                                                "value": ""
+                                            },
+                                            {
+                                                "type": "input-number",
+                                                "label": "虚拟机数量",
+                                                "name": "number",
+                                                "step": 1,
+                                                "validations": {
+                                                    "minimum": 1,
+                                                    "maximum": 99
+                                                },
+                                                "validateOnChange": true,
+                                                "required": true,
+                                                "visibleOn": "${modeSelect == 2}"
+                                            },
+                                        ],
+                                        "submitText": "新建",
+                                        "mode": "horizontal",
+                                        "redirect": "/domain"
+                                    }
+                                ],
+                                "position": "right",
+                                "closeOnEsc": true,
+                                "closeOnOutside": true,
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+        let amisScoped = amis.embed('#root', amisJSON);
+    })();
+    </script>
+
+{% endblock %}

@@ -1,0 +1,54 @@
+<domain type='kvm'>
+  <name>win7-test</name>
+  <uuid>d79359ec-c52c-11ec-bd4b-3cd2e55e04d2</uuid>
+  <title>A short description - title - of the domain</title>
+  <description>Some human readable description</description>
+  <memory unit='KiB'>4194304</memory>
+  <currentMemory unit='KiB'>4194304</currentMemory>
+  <vcpu placement='static'>2</vcpu>
+  <os>
+    <type arch='x86_64' machine='pc-q35-rhel8.2.0'>hvm</type>
+    <boot dev='hd'/>
+    <boot dev='cdrom'/>
+  </os>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <pm>
+    <suspend-to-mem enabled='no'/>
+    <suspend-to-disk enabled='no'/>
+  </pm>
+  <devices>
+    <emulator>/usr/libexec/qemu-kvm</emulator>
+    <disk type='network' device='disk'>
+      <driver name='qemu'/>
+      <auth username='libvirt'>
+        <secret type='ceph' uuid='41801fed-be4b-400d-87c8-525d6340fcb0'/>
+      </auth>
+      <source protocol='rbd' name='libvirt-pool/test-win7'>
+        <host name='ceph1' port='6789'/>
+        <host name='ceph2' port='6789'/>
+      </source>
+      <target dev='vda' bus='virtio'/>
+      <address type='pci' domain='0x0000' bus='0x04' slot='0x00' function='0x0'/>
+    </disk>
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='/mnt/cephfs/iso/CentOS-7-x86_64-Minimal-2009.iso' index='1'/>
+      <backingStore/>
+      <target dev='sda' bus='sata'/>
+      <readonly/>
+      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+    </disk>
+    <interface type='network'>
+      <source network='default'/>
+      <model type='virtio'/>
+      <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
+    </interface>
+    <graphics type='spice' port='5900' autoport='yes' listen='0.0.0.0'>
+      <listen type='address' address='0.0.0.0'/>
+      <image compression='off'/>
+    </graphics>
+  </devices>
+</domain>

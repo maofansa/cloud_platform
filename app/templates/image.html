@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <div id="root" class="app-amis"></div>
+    <link rel="stylesheet" href="{{ url_for('static',filename='amis/sdk.css') }}" />
+    <script src="{{ url_for('static',filename='amis/sdk.js' )}}"></script>
+    <script type="text/javascript">
+    (function () {
+        let amis = amisRequire('amis/embed')
+        let amisJSON = {
+            "type": "page",
+            "title": "虚拟机模板管理",
+            "body": [
+                {
+                    "type": "crud",
+                    "api": "/imagelist",
+                    "name": "imagelist",
+                    "syncLocation": false,
+                    "loadDataOnce": true,
+                    "bulkActions": [
+                        {
+                            "label": "批量删除",
+                            "type": "button",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/images/undefine"},
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "confirmText": "确认要批量删除镜像？",
+                            "reload": "imagelist"
+                        }
+                    ],
+                    "itemActions": [
+                        {
+                            "type": "button",
+                            "label": "删除",
+                            "actionType": "ajax",
+                            "api": {
+                                "method": "put",
+                                "url": "/image/undefine/{$uuid}"
+                            },
+                            "messages": {
+                                "success": "success!!!",
+                                "falied": "falied!!!"
+                            },
+                            "confirmText": "确认要删除模板 $name ？",
+                            "reload": "imagelist"
+                        },
+                    ],
+                    "primaryField": "uuid",
+                    "source": "${items | filter:uuid,title,name:match:keywords}",
+                    "filter": {
+                        "title": "查询条件",
+                        "body": [
+                            {
+                                "type": "input-text",
+                                "name": "keywords",
+                                "label": "关键字"
+                            }
+                        ]
+                    },
+                    "columns": [
+                        {
+                            "name": "uuid",
+                            "label": "UUID",
+                            "sortable": true
+                        },
+                        {
+                            "name": "name",
+                            "label": "名称",
+                            "sortable": true
+                        },
+                        {
+                            "label": "描述",
+                            "name": "title",
+                            "sortable": false
+                        }
+                    ]
+                }
+            ]
+        }
+        let amisScoped = amis.embed('#root', amisJSON);
+    })();
+    </script>
+
+{% endblock %}

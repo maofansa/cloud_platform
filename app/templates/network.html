@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <div id="root" class="app-amis"></div>
+    <link rel="stylesheet" href="{{ url_for('static',filename='amis/sdk.css') }}" />
+    <script src="{{ url_for('static',filename='amis/sdk.js' )}}"></script>
+    <script type="text/javascript">
+    (function () {
+        let amis = amisRequire('amis/embed')
+        let amisJSON = {
+            "type": "page",
+            "title": "虚拟网络",
+            "body": [
+            {
+                "type": "crud",
+                "api": "/networklist",
+                "columns": [
+                    {
+                        "name": "name",
+                        "label": "名称"
+                    },
+                    {
+                        "name": "uuid",
+                        "label": "UUID"
+                    },
+                    {
+                        "name": "bridge",
+                        "label": "网桥"
+                    },
+                    {
+                        "name": "state",
+                        "label": "状态"
+                    },
+                    {
+                        "name": "host",
+                        "label": "主机"
+                    },
+                ],
+                "syncLocation": false,
+                "interval": 10000,
+                "silentPolling": true,
+                "loadDataOnce": true
+            }
+          ]
+        }
+        let amisScoped = amis.embed('#root', amisJSON);
+    })();
+    </script>
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block content %}
+    <h1>Hello, {{ current_user.username }}!</h1>
+    <div class="container">
+        <div class="btn-toolbar" role="toolbar">
+            <button type="button" class="btn btn-primary" id="newDm" data-toggle="modal" data-target="#createDm">新建</button>
+            <div class="btn-group" id="manageBtn" style="display: none">
+                <button type="button" class="btn btn-default">开机</button>
+                <button type="button" class="btn btn-default">挂起</button>
+                <button type="button" class="btn btn-default">关机</button>
+            </div>
+        </div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" onclick="checkAll(this);showBtn()"></th>
+                    <th>UUID</th>
+                    <th>名称</th>
+                    <th>ID</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for domain in domains %}
+                <tr>
+                    <td><input type="checkbox" name="check" onclick="showBtn()"></td>
+                    <td>{{ domain.uuid }}</td>
+                    <td>{{ domain.name }}</td>
+                    <td>{{ domain.id }}</td>
+                    <td>{{ domain.state }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Modal -->
+        <div class="modal fade" id="createDm" role="dialog" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">新建虚拟机</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-lg-2">
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <form class="form" method="POST">
+                            {{ form.uuid.label }}
+                        </form>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary">新建</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Script -->
+    <script>
+        function checkAll(source) {
+            let checkboxes = document.getElementsByName('check');
+            for(let i=0, n=checkboxes.length; i<n; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+
+        function showBtn() {
+            let checkboxes = document.getElementsByName('check');
+            for(let i=0, n=checkboxes.length; i<n; i++) {
+                if(checkboxes[i].checked == true) {
+                    document.getElementById("manageBtn").style.display = "block";
+                    return;
+                }
+            }
+            document.getElementById("manageBtn").style.display = "none";
+        }
+    </script>
+{% endblock %}

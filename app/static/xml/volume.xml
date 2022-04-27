@@ -1,0 +1,5 @@
+<volume type='network'>
+  <name>MyVolume</name>
+  <capacity unit='M'>1024</capacity>
+  <allocation>0</allocation>
+</volume>
