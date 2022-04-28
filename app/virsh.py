@@ -4,6 +4,7 @@
 import re
 
 import libvirt
+import sys
 import xml.etree.ElementTree as ET
 from app.models import User, Domain, Cdrom, Volume, Image
 
@@ -100,7 +101,7 @@ class Host:
 
 
 class MyDomain:
-    domain = None
+    domain : libvirt.virDomain
 
     def __init__(self, domain):
         self.domain = domain
@@ -163,6 +164,21 @@ class MyDomain:
             return 2
         else:
             return 3
+
+    def get_ip(self):
+        """ 返回domain的IP地址 """
+        # 获得domain interfaces字典
+        ifaces = self.domain.interfaceAddresses(libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_AGENT, 0)
+
+        # 查询IPV4地址
+        ip_addr = ""
+        for (name, val) in ifaces.iteritems():
+            if val['addrs']:
+                for ipaddr in val['addrs']:
+                    if ipaddr['type'] == libvirt.VIR_IP_ADDR_TYPE_IPV4:
+                        ip_addr = ipaddr['addr']
+                        break
+        return ip_addr
 
 
 class XMLDomain:

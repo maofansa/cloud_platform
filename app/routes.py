@@ -89,7 +89,8 @@ def get_domains():
                 'memory_usage_mapping': d.map_memory_usage(),
                 'title': title,
                 'description': description,
-                'vcpu': vcpu
+                'vcpu': vcpu,
+                'ip': d.get_ip()
             })
     close_hosts(hosts)
 
