@@ -65,32 +65,43 @@ def get_domains():
     temp = []
     count = 0
 
+    if current_user.username == 'admin':
+        dom_list_db = Domain.query.all()
+    else:
+        dom_list_db = Domain.query.filter_by(owner=current_user.id).all()
+
     hosts = conn_hosts(host_list)
     for host in hosts:
         hostname = host.get_hostname()
-        domains = host.get_domains()
-        for d in domains:
-            count += 1
-            uuid = d.domain.UUIDString()
-            db_d = Domain.query.filter_by(uuid=uuid).first()
-            title, description, vcpu = '', '', 0
-            if db_d is not None:
-                title = db_d.title
-                description = db_d.description
-                vcpu = db_d.vcpu
+
+        # TO DO: 针对多host选择dom
+        for dom_db in dom_list_db:
+            dom = host.get_domain_by_uuid(dom_db.uuid)
+            if dom is None:
+                continue
+        # domains = host.get_domains()
+        # for d in domains:
+        #     count += 1
+        #     uuid = d.domain.UUIDString()
+        #     db_d = Domain.query.filter_by(uuid=uuid).first()
+        #     title, description, vcpu = '', '', 0
+        #     if db_d is not None:
+        #         title = db_d.title
+        #         description = db_d.description
+        #         vcpu = db_d.vcpu
             temp.append({
-                'id': d.get_id(),
-                'uuid': d.domain.UUIDString(),
-                'name': d.domain.name(),
-                'state': d.get_domain_state(),
+                'id': dom.get_id(),
+                'uuid': dom.domain.UUIDString(),
+                'name': dom_db.name,
+                'state': dom.get_domain_state(),
                 'host': hostname,
-                'max_memory': d.domain.maxMemory(),
-                'memory_usage': d.get_memory_usage(),
-                'memory_usage_mapping': d.map_memory_usage(),
-                'title': title,
-                'description': description,
-                'vcpu': vcpu,
-                'ip': d.get_ip()
+                'max_memory': dom.domain.maxMemory(),
+                'memory_usage': dom.get_memory_usage(),
+                'memory_usage_mapping': dom.map_memory_usage(),
+                'title': dom_db.title,
+                'description': dom_db.description,
+                'vcpu': dom_db.vcpu,
+                # 'ip': d.get_ip()
             })
     close_hosts(hosts)
 
@@ -894,7 +905,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+            flash('用户名或密码错误')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
@@ -918,9 +929,10 @@ def register():
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
+        user.set_dom_count()
         db.session.add(user)
         db.session.commit()
         # db.session.close()
-        flash('Congratulations, you are now a registered user!')
+        flash('新用户注册成功！')
         return redirect(url_for('login'))
     return render_template('register.html', title="Register", form=form)

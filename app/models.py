@@ -12,6 +12,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    dom_count = db.Column(db.Integer, nullable=False)
+    dom_owned_count = db.Column(db.Integer, nullable=False)
+    domain = db.relationship('Domain', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -22,6 +25,25 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def set_dom_count(self, count=2):
+        if self.username == 'admin':
+            self.dom_count = -1
+        else:
+            self.dom_count = count
+        self.dom_owned_count = 0
+
+    def check_dom_creatable(self, count):
+        creatable = False
+        if self.dom_count == -1:
+            creatable = True
+        elif self.dom_count-self.dom_owned_count >= count:
+            creatable =  True
+        return creatable
+#
+# class Host(db.Model):
+#     __tablename__ = 'host'
+#     id = db.Colume(db.C)
+#     ip = db.Column(db.string(15), prim)
 
 class Domain(db.Model):
     __tablename__ = 'domain'
@@ -34,6 +56,7 @@ class Domain(db.Model):
     volume_uuid = db.Column(db.String(36), db.ForeignKey('volume.uuid', ondelete='SET NULL'))
     cdrom_id = db.Column(db.Integer, db.ForeignKey('cdrom.id', ondelete='SET NULL'))
     image_uuid = db.Column(db.String(36), db.ForeignKey('image.uuid', ondelete='SET NULL'))
+    owner = db.Column(db.Integer, db.ForeignKey('user.id', onedelete='SET NULL'))
 
     def __repr__(self):
         return '<Domain {}>'.format(self.name)
