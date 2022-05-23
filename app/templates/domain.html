@@ -168,6 +168,7 @@
                         {
                             "type": "button",
                             "label": "修改配置",
+                            "disabledOn": "${state != 'SHUTOFF'}",
                             "actionType": "dialog",
                             "dialog": {
                                 "type": "dialog",
@@ -227,6 +228,7 @@
                         {
                             "type": "button",
                             "label": "生成模板",
+                            "disabledOn": "${gen_image != ''}",
                             "actionType": "dialog",
                             "dialog": {
                                 "type": "dialog",
@@ -304,6 +306,16 @@
                             "sortable": true
                         },
                         {
+                            "name": "graphic",
+                            "label": "图形连接",
+                            "sortable": true
+                        },
+                        {
+                            "name": "ip",
+                            "label": "IP",
+                            "sortable": true
+                        },
+                        {
                             "label": "内存使用数据",
                             "name": "memory_usage",
                             "visible": false,
@@ -340,8 +352,18 @@
                             "name": "description"
                         },
                         {
+                            "name": "gen_image",
+                            "label": "生成模板",
+                            "sortable": true
+                        },
+                        {
                             "name": "host",
                             "label": "主机",
+                            "sortable": true
+                        },
+                        {
+                            "name": "owner",
+                            "label": "用户",
                             "sortable": true
                         }
                     ],
@@ -440,17 +462,6 @@
                                                 "required": true
                                             },
                                             {
-                                                "type": "switch",
-                                                "option": "",
-                                                "name": "imageSwitch",
-                                                "optionAtLeft": false,
-                                                "trueValue": true,
-                                                "falseValue": false,
-                                                "offText": "从镜像创建",
-                                                "onText": "从模板创建",
-                                                "value": false
-                                            },
-                                            {
                                                 "type": "input-number",
                                                 "label": "硬盘",
                                                 "name": "storage",
@@ -463,8 +474,18 @@
                                                 "unitOptions": [
                                                     "GB"
                                                 ],
-                                                "required": true,
-                                                "visibleOn": "${imageSwitch == false}"
+                                                "required": true
+                                            },
+                                            {
+                                                "type": "switch",
+                                                "option": "",
+                                                "name": "imageSwitch",
+                                                "optionAtLeft": false,
+                                                "trueValue": true,
+                                                "falseValue": false,
+                                                "offText": "从镜像创建",
+                                                "onText": "从模板创建",
+                                                "value": false
                                             },
                                             {
                                                 "type": "select",
@@ -481,6 +502,25 @@
                                                 "source": "/imagelistname",
                                                 "required": true,
                                                 "visibleOn": "${imageSwitch}"
+                                            },
+                                            {
+                                                "type": "radios",
+                                                "label": "远程连接方式",
+                                                "name": "protocol",
+                                                "options": [
+                                                    {
+                                                        "label": "VNC",
+                                                        "value": "vnc"
+                                                    },
+                                                    {
+                                                        "label": "SPICE",
+                                                        "value": "spice"
+                                                    }
+                                                ],
+                                                "joinValues": true,
+                                                "mode": "horizontal",
+                                                "required": true,
+                                                "value": "vnc"
                                             },
                                             {
                                                 "label": "简单描述",
